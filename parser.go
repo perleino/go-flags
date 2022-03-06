@@ -172,8 +172,8 @@ func NewParser(data interface{}, options Options) *Parser {
 	return p
 }
 
-func NewParserWithWriter(data interface{}, options Options, stdOut io.Writer, stdErr io.Writer) *Parser {
-	p := NewNamedParserWithWriters(path.Base(os.Args[0]), options, stdOut, stdErr)
+func NewParserWithWriter(appname string, data interface{}, options Options, stdOut io.Writer, stdErr io.Writer) *Parser {
+	p := NewNamedParserWithWriters(appname, options, stdOut, stdErr)
 
 	if data != nil {
 		g, err := p.AddGroup("Application Options", "", data)
