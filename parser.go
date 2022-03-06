@@ -5,6 +5,7 @@
 package flags
 
 import (
+	"io"
 	"bytes"
 	"fmt"
 	"os"
@@ -57,6 +58,8 @@ type Parser struct {
 	CommandHandler func(command Commander, args []string) error
 
 	internalError error
+	stdOut io.Writer
+	stdErr io.Writer
 }
 
 // SplitArgument represents the argument value of an option that was passed using
@@ -173,16 +176,25 @@ func NewParser(data interface{}, options Options) *Parser {
 // executable name in the built-in help message. Option groups and commands can
 // be added to this parser by using AddGroup and AddCommand.
 func NewNamedParser(appname string, options Options) *Parser {
+	p := NewNamedParserWithWriters(appname, options, os.Stdout, os.Stderr)
+	return p
+}
+
+func NewNamedParserWithWriters(appname string, options Options, stdOut io.Writer, stdErr io.Writer) *Parser {
 	p := &Parser{
 		Command:               newCommand(appname, "", "", nil),
 		Options:               options,
 		NamespaceDelimiter:    ".",
 		EnvNamespaceDelimiter: "_",
+		stdOut: stdOut,
+		stdErr: stdErr,
 	}
 
 	p.Command.parent = p
 
 	return p
+
+
 }
 
 // Parse parses the command line arguments from os.Args using Parser.ParseArgs.
@@ -704,9 +716,9 @@ func (p *Parser) printError(err error) error {
 		flagsErr, ok := err.(*Error)
 
 		if ok && flagsErr.Type == ErrHelp {
-			fmt.Fprintln(os.Stdout, err)
+			fmt.Fprintln(p.stdOut, err)
 		} else {
-			fmt.Fprintln(os.Stderr, err)
+			fmt.Fprintln(p.stdErr, err)
 		}
 	}
 
