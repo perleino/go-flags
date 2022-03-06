@@ -172,6 +172,24 @@ func NewParser(data interface{}, options Options) *Parser {
 	return p
 }
 
+func NewParserWithWriter(data interface{}, options Options, stdOut io.Writer, stdErr io.Writer) *Parser {
+	p := NewNamedParserWithWriters(path.Base(os.Args[0]), options, stdOut, stdErr)
+
+	if data != nil {
+		g, err := p.AddGroup("Application Options", "", data)
+
+		if err == nil {
+			g.parent = p
+		}
+
+		p.internalError = err
+	}
+
+	return p
+}
+
+
+
 // NewNamedParser creates a new parser. The appname is used to display the
 // executable name in the built-in help message. Option groups and commands can
 // be added to this parser by using AddGroup and AddCommand.
